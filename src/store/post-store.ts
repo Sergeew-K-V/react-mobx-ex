@@ -1,29 +1,16 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { getPosts, IPosts } from "../api/getPosts";
+import { fromPromise, IPromiseBasedObservable } from "mobx-utils";
 
 class PostStore {
-  posts: IPosts[] = [];
-  isLoading = false;
+  posts?: IPromiseBasedObservable<IPosts[]>;
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  getPostsAction = async () => {
-    try {
-      this.isLoading = true;
-      const res = await getPosts();
-
-      runInAction(() => {
-        this.posts = res;
-        this.isLoading = false;
-      });
-    } catch (error) {
-      console.log(
-        "~~~~ ~ PostStore ~ getPostsAction=async ~ error~~~~:",
-        error
-      );
-    }
+  getPostsAction = () => {
+    this.posts = fromPromise(getPosts());
   };
 }
 
